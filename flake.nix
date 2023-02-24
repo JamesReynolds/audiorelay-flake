@@ -22,6 +22,7 @@
           sourceRoot = ".";
           installPhase = ''
             mkdir -p $out
+            ln -sf AudioRelay bin/audio-relay
             cp -rp bin lib $out/
             cp $out/lib/app/AudioRelay.cfg $out/lib/app/.AudioRelay-wrapped.cfg
           '';
