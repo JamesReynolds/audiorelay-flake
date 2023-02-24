@@ -9,7 +9,7 @@
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
     in
       {
-        packages."x86_64-linux".audio-relay = pkgs.stdenv.mkDerivation {
+        packages."x86_64-linux".audio-relay = pkgs.stdenv.mkDerivation rec {
           name = "audio-relay";
           version = "0.26.3";
 
@@ -20,16 +20,32 @@
             sha256 = "05553s1gp9bimr79nvagdk0l8ahmbwkqg6i6csavvzw40kisj49r";
           };
           sourceRoot = ".";
+
+          desktopItem = pkgs.makeDesktopItem {
+            name = "AudioRelay";
+            exec = "audio-relay";
+            genericName = "AudioRelay audio bridge";
+            comment = "AudioRelay sound server/player";
+            categories = [ "Network" "Audio" ];
+            desktopName = "AudioRelay";
+            mimeTypes = [];
+            icon = "audiorelay";
+          };
+
           installPhase = ''
-            mkdir -p $out
+            mkdir -p $out/share/icons/hicolor/512x512/apps
             ln -sf AudioRelay bin/audio-relay
             cp -rp bin lib $out/
+            cp lib/AudioRelay.png $out/share/icons/hicolor/512x512/apps/audiorelay.png
+            cp -r ${desktopItem}/share/applications $out/share
             cp $out/lib/app/AudioRelay.cfg $out/lib/app/.AudioRelay-wrapped.cfg
           '';
+
           nativeBuildInputs = with pkgs; [
             autoPatchelfHook
             makeWrapper
           ];
+
           buildInputs = with pkgs; [
             alsaLib
             file
@@ -49,6 +65,7 @@
           ];
 
           dontAutoPatchelf = true;
+
           postFixup = ''
             autoPatchelf \
               $out/bin \
